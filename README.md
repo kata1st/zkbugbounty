@@ -2,19 +2,25 @@
 
 ## Motivation
 
-In the last few years more than a billion dollars were stolen from smart contracts (you can see a list of the biggest hacks in [Rekt News](https://rekt.news/leaderboard/)). Classic bug bounty (like [Immunefi](https://immunefi.com)) have a solution to this problem - hacker will have economic incentive to report vulnerability (for reward). But it's not very effective because hacker has risk that project or escrow will say "it's a not real vulnerability". That means that hacker will most probably use such vulnerability next time, instead of reporting it.
+In the last few years more than a billion dollars were stolen from smart contracts (here are list of the biggest hacks: [Rekt News](https://rekt.news/leaderboard/)). Classic bug bounty solutions, like [Immunefi](https://immunefi.com), financially incentivize hackers to report a vulnerability. Payment for exposing the vulnerability however is not guaranteed; the severity of the bug is at the discretion of the project posting the bug bounty, who could claim the exploit as "not a real vulnerability". In short, a rational hacker is incentivized to exploit the vulnerability instead of report it.
 
-We propose to write system, where hacker can prove **formally** and **mathematically** that he found a bug.
+We propose to write a system, where a hacker can **formally** and **mathematically** prove the bug.
 
 ## Architecture
 
 ### State Transition Proof
 
-All business logic of user function (for example function `transfer`in some pseudoERC20 Token ) will be implemented as ZK circuit. For example, if user Alice wants to send money to user Bob - Alice will generate zk proof, which will change state of full system from `state0` to `state1`. This proof we will call `State Transition Proof`
+All the business logic of user function (for example function `transfer` in some pseudoERC20 Token) will be implemented as ZK circuit. For example, if user Alice wants to send money to Bob - Alice will generate zk proof, which will change the state from `state0` to `state1`, let's call this proof a `State Transition Proof`
 
 ### Hack Proof
 
-Imagine that some hacker has found vulnerability. He gets historical state of the system `stateX` and applies to it some correct state transitions (for example, transfers: Alice sends money to Bob and Bob sends money to Carrel). He then can prove this state transition using the same circuit, which called `State Transition Proof` as is done by regular users Alice and Bob. In case result of this manipulation goes to `incorrectState`: for example money supply was increased - he can easelly prove it using zk. Criteria and rules for `incorrectState` should be provided by developers of system and should be part of the `Hack Proof`. Also public input `Hack Proof` should be encrypted by contract owner's public key. That means that only contract owner will understand where is the problem
+Imagine a hacker finds a vulnerability. The hacker applies a state transition to the historical state of the system `stateX`. For example:
+1. Alice sends money to Bob.
+2. Bob sends money to Carrie. 
+
+The hacker can generate a `State Transition Proof` using a ZK circuit. In the event that the applied transition results in an `incorrectState`, the zk proof would show the same. Ex: `Balance(Alice, t=0) + Balance(Bob, t=0) + Balance(Carrie, t=0) != Balance(Alice, t=1) + Balance(Bob, t=1) + Balance(Carrie, t=1)`. The dependencies to create such a formal proof are: 
+1. The criteria and rules for what comprises an `incorrectState` would need to be provided by developers of the project/application and be a part of the `Hack Proof`. 
+2. The public input `Hack Proof` should be encrypted by contract owner's public key such that only the contract owner is aware of where the bug is.
 
 ### Smart contract
 
